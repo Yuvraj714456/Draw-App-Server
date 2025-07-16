@@ -1,0 +1,9 @@
+
+
+const JOIN_ROOM = "JOIN_ROOM"
+
+const LEAVE_ROOM = "LEAVE_ROOM"
+
+const CHAT = "CHAT"
+
+export {JOIN_ROOM,LEAVE_ROOM,CHAT}
