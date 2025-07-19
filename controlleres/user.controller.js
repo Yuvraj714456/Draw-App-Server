@@ -10,13 +10,13 @@ import {v4 as uuid} from 'uuid'
 
 
 const newUser = Trycatch(async  (req,res,next)=>{
-    const {name,username,email,password,confirmpassword} = req.body;
+    const {name,username,email,password,confirmPassword} = req.body;
 
     if(password.length < 8){
         return next(new ErrorHandler("Password must be greater then 8",401));
     }
 
-    if(password !== confirmpassword){
+    if(password !== confirmPassword){
         return next(new ErrorHandler("Password and Confirm Password are not same",401));
     }
 
@@ -59,7 +59,7 @@ const loginUser = Trycatch(async (req,res,next)=>{
 
     // check user is resent on the DB 
     const user = await User.findOne({
-        $or:[{username,email}]
+        $or:[{username},{email}]
     })
 
     console.log(user);
@@ -79,46 +79,31 @@ const loginUser = Trycatch(async (req,res,next)=>{
 
 
 const room = Trycatch(async (req,res,next)=>{
-    const {slug,members=[]} = req.body;
-    const {userId,type} = req.user;
+    const {slug="",members=[]} = req.body;
+    const {userId} = req.user;
 
-    if(type === "authenticated"){
-        const user = await User.findById(userId);
+    if(!userId)
+        return next(new ErrorHandler("Please login to access this page",403));
+    const user = await User.findById(userId);
         if(!user)
             return next(new ErrorHandler("Invalid user",403));
 
         const roomData = await Room.create({
-            slug,
+            slug:slug,
             members:[...members,userId],
             createdBy:userId,
         });
 
         return res.status(200).json({
             success:true,
-            message:"Room created and saved in DB",
+            message:"Drawing setup completed",
             roomData:{
-                roomId:roomData.roomId,
+                roomId:roomData._id,
                 slug:roomData.slug,
                 createdBy:roomData.createdBy,
                 createdAt:roomData.createdAt,
             }
-        });
-    }
-    const fakeRoomId = uuid();
-
-    const fakeRoom={
-        roomId:fakeRoomId,
-        slug,
-        members:[...members,userId],
-        createdBy:userId,
-        createdAt:new Date(),
-    }
-
-    return res.status(200).json({
-        success:true,
-        message:"Temporary room created (not saved in DB)",
-        roomData:fakeRoom
-    })
+    });
 })
 
 

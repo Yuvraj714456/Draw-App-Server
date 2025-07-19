@@ -16,36 +16,33 @@ const setupSocket = (io)=>{
     });
 
     io.on("connection",(socket)=>{
-        const {userId,username,type} = socket.user;
+        const {userId,username} = socket.user;
 
         if(!userId){
             console.log("Inavlid socket connection");
             return socket.disconnect();
         }
 
-        users.set(socket.id,{userId,username,type,rooms:[]});
+        users.set(socket.id,{userId,username,rooms:[]});
 
-        console.log(`✅ ${username} (${type}) connected via socket: ${socket.id}`);
+        console.log(`✅ ${username} connected via socket: ${socket.id}`);
 
 
-        socket.on(JOIN_ROOM,({roomId})=>{
+        socket.on(JOIN_ROOM,(roomId)=>{
             const userData = users.get(socket.id);
-            console.log(`${socket.id} is joining room ${roomId}`);
-
-
             if(!userData) return;
 
+            console.log(roomId);
             if(!userData.rooms.includes(roomId)){
                 userData.rooms.push(roomId);
             }
 
             const members = getAllSocketMemebersWithSpecificRoomId(users,roomId);
-            console.log("Joined members",members);
+
             for(const socketId of members){
                 io.to(socketId).emit(JOIN_ROOM,{
                     userId:userData.userId,
                     username:userData.username,
-                    type:userData.type,
                     roomId
                 });
             }
@@ -64,7 +61,6 @@ const setupSocket = (io)=>{
                 io.to(socketId).emit(LEAVE_ROOM,{
                     userId: userData.userId,
                     username: userData.username,
-                    type: userData.type,
                     roomId,
                 });
             }
@@ -75,26 +71,20 @@ const setupSocket = (io)=>{
             const userData = users.get(socket.id);
 
             if(!userData || !userData.rooms.includes(roomId)) return;
-            if(!content.trim()) return;
 
-            let newMessage = null;
-
-            if(userData.type === "authenticated"){
-                newMessage = await Chat.create({
+            const  newMessage = await Chat.create({
                     roomId,
                     sender:userData.userId,
-                    message:content,
+                    message:JSON.stringify(content),
                 })
-            }
 
             const messagePayload = {
-                _id:newMessage?._id || `temp_${Date.now()}`,
+                _id:newMessage?._id,
                 roomId,
                 sender:userData.userId,
                 username:userData.username,
-                type:userData.type,
                 content,
-                createdAt:newMessage?.createdAt || new Date(),
+                createdAt:newMessage.createdAt,
             }
 
             const members = getAllSocketMemebersWithSpecificRoomId(users,roomId);

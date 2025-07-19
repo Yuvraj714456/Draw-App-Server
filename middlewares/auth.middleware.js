@@ -6,29 +6,14 @@ import { User } from '../models/user.model.js';
 const authorization = Trycatch((req, res, next) => {
     const token = req.cookies["Draw-token"]; 
 
-    if(token){
-        try {
-            const decodedData = jwt.verify(token,process.env.JWT_SECRET);
+    if(!token)
+        throw new ErrorHandler("Authentication token missing", 401);
 
-            req.user={
-                userId:decodedData._id,
-                type:"authenticated",
-            }
+    const decodedData = jwt.verify(token,process.env.JWT_SECRET);
 
-        } catch (error) {
-            req.user={
-                userId:"anon_"+Math.random().toString(36).substring(2,8),
-                type:"anonymus"
-            }
-        }
-    }else{
-        req.user={
-                userId:"anon_"+Math.random().toString(36).substring(2,8),
-                type:"anonymus"
-        }
-    }
+    req.user={ userId:decodedData._id,}
     
-    next()
+    next();
 });
 
 const socketAuthenticator = async(err,socket,next)=>{
@@ -38,33 +23,24 @@ const socketAuthenticator = async(err,socket,next)=>{
 
         const authToken = socket.request.cookies["Draw-token"];
 
-        if(authToken){
-            try {
-                const decodedData = jwt.verify(authToken,process.env.JWT_SECRET);
-                const user = await User.findById(decodedData._id);
-                if(user){
-                    socket.user={
-                        userId:user._id.toString(),
-                        username:user.username,
-                        type:"authenticated"
-                    }
-                    return next();
-                }
-            } catch (error) {
-                console.log("Someting went wrong sduring socketAuthetication");
-            }
-        }
+        if(!authToken)
+            return next(new ErrorHandler("Authentication token missing",401));
 
-        const anonId = "anon_"+Math.random().toString(36).substring(2,8);
+        const decodedData = jwt.verify(authToken,process.env.JWT_SECRET);
+
+        const user = await User.findById(decodedData._id);
+        
+        if(!user)
+            return next(new ErrorHandler("User not found",404));
+
         socket.user={
-            userId:anonId,
-            username:anonId,
-            type:"anonymus",
+            userId:user._id.toString(),
+            username:user.username,
         }
-
+        
         return next();
     }catch(error){
-        return next(new ErrorHandler("Socket authentication failed",500));
+        return next(new ErrorHandler("Inavlid or expired token",500));
     }
 }
 
