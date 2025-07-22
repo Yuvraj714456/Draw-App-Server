@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const connectDB =()=> mongoose.connect(`${process.env.MONGODB_URI}/Draw`)
+const connectDB =()=> mongoose.connect(`${process.env.MONGODB_URI}`)
                     .then(()=>{
                         console.log('MongoDB connected successfully');
                     }).catch((err)=>{

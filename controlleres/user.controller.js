@@ -5,7 +5,7 @@ import { User } from "../models/user.model.js";
 import { sendToken } from "../utils/features.js";
 import { ErrorHandler } from "../utils/utility.js";
 import bcrypt from 'bcrypt'
-import {v4 as uuid} from 'uuid'
+
 
 
 
