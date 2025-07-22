@@ -10,8 +10,7 @@ const chatSchema = mongoose.Schema({
         ref:"User"
     },
     roomId:{
-        type:String,
-        required:true,
+        type:mongoose.Schema.Types.ObjectId,
         ref:"Room"
     }
 },{timestamps:true})

@@ -79,7 +79,7 @@ const loginUser = Trycatch(async (req,res,next)=>{
 
 
 const room = Trycatch(async (req,res,next)=>{
-    const {slug="",members=[]} = req.body;
+    const {slug="",members=[],description} = req.body;
     const {userId} = req.user;
 
     if(!userId)
@@ -92,6 +92,7 @@ const room = Trycatch(async (req,res,next)=>{
             slug:slug,
             members:[...members,userId],
             createdBy:userId,
+            description
         });
 
         return res.status(200).json({
@@ -121,4 +122,39 @@ const getChats = Trycatch(async (req,res,next)=>{
     })
 })
 
-export {newUser,loginUser,room,getChats}
+
+
+const getUserDetails = Trycatch(async (req, res, next) => {
+  const { userId } = req.user;
+
+  if (!userId) return next(new ErrorHandler("Invalid user", 403));
+
+  const user = await User.findById(userId).lean();
+
+  if (!user) return next(new ErrorHandler("User not found", 404));
+
+  const rooms = await Room.find({ createdBy: userId })
+
+  const fullDetails = {...user,rooms}
+  return res.status(200).json({
+    success: true,
+    userdetails:fullDetails
+  });
+});
+
+const getProfile = Trycatch(async (req,res,next)=>{
+    const {userId} = req.user;
+
+    const user = await User.findById(userId);
+
+    if(!user) 
+        return next(new ErrorHandler("user is not defined",404)); 
+
+    res.status(200).json({
+        success:true,
+        user:user,
+    })
+})
+
+
+export {newUser,loginUser,room,getChats,getUserDetails,getProfile}
