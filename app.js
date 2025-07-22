@@ -7,19 +7,16 @@ import cors from 'cors'
 
 
 const app = express();
-
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors(corsOptions));
+
 
 app.get('/',(req,res)=>{
     res.send("Hello world");
 })
 
 app.use('/api/v1',router)
-
-
-
 
 app.use(errorMiddleware);
 
