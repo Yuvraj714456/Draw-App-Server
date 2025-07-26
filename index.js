@@ -13,7 +13,7 @@ const server =http.createServer(app);
 
 const io = new Server(server,{
     cors:{
-        origin:['https://draw-app-frontend-cnp1.vercel.app',
+        origin:['https://draw-app-cnp1.vercel.app',
                 "http://localhost:5173"],
         methods:["GET","POST"],
         credentials:true,
