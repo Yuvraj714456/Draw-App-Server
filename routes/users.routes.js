@@ -1,5 +1,5 @@
 import express from "express";
-import { getChats, getProfile, getUserDetails, loginUser, newUser, room } from "../controlleres/user.controller.js";
+import { getChats, getProfile, getUserDetails, loginUser, logOut, newUser, room } from "../controlleres/user.controller.js";
 import { authorization } from "../middlewares/auth.middleware.js";
 import { loginValidator, registerValidator, validateHandler } from "../utils/Validator.js";
 
@@ -18,5 +18,7 @@ router.get('/chat/:roomId',getChats);
 router.get('/userdetails',getUserDetails);
 
 router.get('/me',getProfile);
+
+router.get('/logout',logOut);
 
 export {router};

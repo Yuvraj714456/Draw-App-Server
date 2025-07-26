@@ -156,5 +156,17 @@ const getProfile = Trycatch(async (req,res,next)=>{
     })
 })
 
+const logOut = Trycatch(async (req,res,next)=>{
+    res.status(200).cookie("Draw-token","",{
+        maxAge:0,
+        sameSite:"none",
+        httpOnly:true,
+        secure:true,
+    }).json({
+        success:true,
+        message:"Log out successfully"
+    })
+})
 
-export {newUser,loginUser,room,getChats,getUserDetails,getProfile}
+
+export {newUser,loginUser,room,getChats,getUserDetails,getProfile,logOut}
